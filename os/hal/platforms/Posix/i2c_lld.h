@@ -87,13 +87,16 @@ typedef enum{
  * @brief Driver configuration structure.
  */
 typedef struct {
+  i2copmode_t mode;
   uint32_t                  clock;
+  i2cdutycycle_t duty_cycle; 
+
 } I2CConfig;
 
 typedef struct {
-    char * buffer;
+    char *buffer;
     bool isMalloc;
-
+    bool isAllocate;
 }buffer_stream;
 /**
  * @brief   Type of a structure representing an I2C driver.
@@ -132,8 +135,8 @@ struct I2CDriver {
   /* End of the mandatory fields.*/
   i2caddr_t addr;
  
-
-  I2C_TypeDef *i2c;
+   
+  //I2C_TypeDef *i2c;
 };
 
 
