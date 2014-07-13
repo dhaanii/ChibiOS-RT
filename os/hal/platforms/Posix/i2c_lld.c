@@ -45,8 +45,7 @@ I2CDriver I2CD1;
 /*===========================================================================*/
 /* Driver local variables and types.                                         */
 /*===========================================================================*/
-buffer_stream *bs_1;
-
+ buffer_stream *bs_1;
 /*===========================================================================*/
 /* Driver local functions.                                                   */
 /*===========================================================================*/
@@ -55,7 +54,7 @@ buffer_stream *bs_1;
 static bool allocate_stream(buffer_stream  *bs)
 {
 
-    bs->buffer = (char *)malloc(sizeof(char)*1024);
+    bs->buffer = malloc(256);
     
     if(bs->buffer == NULL || bs->isMalloc == true)
     {
@@ -75,6 +74,8 @@ static void release_stream(buffer_stream *bs)
 {
     free(bs->buffer); 
     bs->isMalloc = false;
+    free(bs);
+
 }
 /*===========================================================================*/
 /* Driver interrupt handlers.                                                */
@@ -94,8 +95,10 @@ void i2c_lld_init(void) {
 #if PLATFORM_I2C_USE_I2C1
   i2cObjectInit(&I2CD1);
 #endif /* PLATFORM_I2C_USE_I2C1 */
-  bs_1->isMalloc = false;
-
+ bs_1 = malloc(sizeof(*bs_1));
+ bs_1->isMalloc = false;
+ bs_1->buffer = NULL;
+ bs_1->isAllocate = true;
 }
 
 /**
@@ -111,6 +114,10 @@ void i2c_lld_start(I2CDriver *i2cp) {
     /* Enables the peripheral.*/
 #if PLATFORM_I2C_USE_I2C1
      if (&I2CD1 == i2cp) {
+        if(bs_1->isAllocate == false)
+        {
+            bs_1 = malloc(sizeof(*bs_1));
+        }
         bool b;
         b = allocate_stream(bs_1);
         chDbgAssert(!b, "i2c_lld_start(), #1", "stream already allocated");
@@ -175,7 +182,6 @@ msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
   (void)rxbuf;
   (void)rxbytes;
   (void)timeout;
-   I2C_TypeDef *dp = i2cp->i2c;
    VirtualTimer vt;
    if(timeout != TIME_INFINITE)
    {
@@ -222,7 +228,6 @@ msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
   (void)rxbuf;
   (void)rxbytes;
   (void)timeout;
-   I2C_TypeDef *dp = i2cp->i2c;
    VirtualTimer vt;
    if(timeout != TIME_INFINITE)
    {
