@@ -17,6 +17,16 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+/*
+ * Dummy LEDs
+ */
+#define GPIOD_LED1              1
+#define GPIOD_LED2              2
+#define GPIOD_LED3              3
+#define GPIOD_LED4              4
+#define GPIOD_LED5              5
+#define GPIOD_LED6              6
+
 #if !defined(_FROM_ASM_)
 #ifdef __cplusplus
 extern "C" {

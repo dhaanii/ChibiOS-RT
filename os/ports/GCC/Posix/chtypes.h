@@ -49,6 +49,17 @@
 #include <stdint.h>
 #endif
 
+/* Added to make the header stand-alone when included from asm.*/
+#ifndef FALSE
+#define FALSE       0
+#endif
+#ifndef TRUE
+#define TRUE        (!FALSE)
+#endif
+#ifndef true /* FIXME */
+#define true TRUE
+#endif
+
 /**
  * @brief   Boolean, recommended the fastest signed.
  */
@@ -70,6 +81,11 @@ typedef uint8_t         tstate_t;
 typedef uint8_t         trefs_t;
 
 /**
+ * @brief   Thread time slices counter.
+ */
+typedef uint8_t         tslices_t;
+
+/**
  * @brief   Priority, use the fastest unsigned type.
  */
 typedef uint32_t        tprio_t;
@@ -88,6 +104,11 @@ typedef int32_t         eventid_t;
  * @brief   Event Mask, recommended fastest unsigned.
  */
 typedef uint32_t        eventmask_t;
+
+/**
+ * @brief   Event flags.
+ */
+typedef uint32_t        flagsmask_t;
 
 /**
  * @brief   System Time, recommended fastest unsigned.
