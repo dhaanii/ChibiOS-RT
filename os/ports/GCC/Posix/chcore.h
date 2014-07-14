@@ -41,6 +41,7 @@
 /*===========================================================================*/
 /* Port constants.                                                           */
 /*===========================================================================*/
+#define SIMULATOR
 
 /*===========================================================================*/
 /* Port macros.                                                              */
@@ -196,6 +197,37 @@ struct context {
  *          macro must be omitted.
  */
 #define PORT_FAST_IRQ_HANDLER(id) void id(void)
+
+/**
+ * @brief   Managed RAM size.
+ * @details Size of the RAM area to be managed by the OS. If set to zero
+ *          then the whole available RAM is used. The core memory is made
+ *          available to the heap allocator and/or can be used directly through
+ *          the simplified core memory allocator.
+ *
+ * @note    In order to let the OS manage the whole RAM the linker script must
+ *          provide the @p __heap_base__ and @p __heap_end__ symbols.
+ * @note    Requires @p CH_USE_MEMCORE.
+ */
+#ifdef CH_MEMCORE_SIZE
+ #undef CH_MEMCORE_SIZE
+#endif
+#define CH_MEMCORE_SIZE                 0x40000
+
+/**
+ * @brief   Debug option, stack checks.
+ * @details If enabled then a runtime stack check is performed.
+ *
+ * @note    The default is @p FALSE.
+ * @note    The stack check is performed in a architecture/port dependent way.
+ *          It may not be implemented or some ports.
+ * @note    The default failure mode is to halt the system with the global
+ *          @p panic_msg variable set to @p NULL.
+ */
+#ifdef CH_DBG_ENABLE_STACK_CHECK
+ #undef CH_DBG_ENABLE_STACK_CHECK
+#endif
+#define CH_DBG_ENABLE_STACK_CHECK       FALSE
 
 #ifdef __cplusplus
 extern "C" {

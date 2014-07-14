@@ -25,6 +25,8 @@
 #ifndef _EXT_LLD_H_
 #define _EXT_LLD_H_
 
+#include "pal_lld.h"
+
 #if HAL_USE_EXT || defined(__DOXYGEN__)
 
 /*===========================================================================*/
