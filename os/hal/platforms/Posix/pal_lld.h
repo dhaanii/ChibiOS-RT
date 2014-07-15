@@ -22,6 +22,9 @@
  * @{
  */
 
+/* Temporarily include stdio.h */
+#include <stdio.h>
+
 #ifndef _PAL_LLD_H_
 #define _PAL_LLD_H_
 
@@ -114,25 +117,11 @@ typedef sim_vio_port_t *ioportid_t;
  * @brief   VIO port 1 identifier.
  */
 #define IOPORT1         (&vio_port_1)
-#define GPIOA IOPORT1
 
 /**
  * @brief   VIO port 2 identifier.
  */
 #define IOPORT2         (&vio_port_2)
-#define GPIOB IOPORT2
-
-/**
- * @brief   VIO port 3 identifier.
- */
-#define IOPORT3         (&vio_port_3)
-#define GPIOC IOPORT3
-
-/**
- * @brief   VIO port 4 identifier.
- */
-#define IOPORT4         (&vio_port_4)
-#define GPIOD IOPORT4
 
 /*===========================================================================*/
 /* Implementation, some of the following macros could be implemented as      */
@@ -180,8 +169,7 @@ typedef sim_vio_port_t *ioportid_t;
  *
  * @notapi
  */
-#include <stdio.h>
-#define pal_lld_writeport(port, bits) printf("PORT %p LATCH %d BITS %d\n", (void*)(port), (port)->latch, (bits)); ((port)->latch = (bits))
+#define pal_lld_writeport(port, bits) ((port)->latch = (bits))
 
 /**
  * @brief   Pads group mode setup.
@@ -201,8 +189,6 @@ typedef sim_vio_port_t *ioportid_t;
 #if !defined(__DOXYGEN__)
 extern sim_vio_port_t vio_port_1;
 extern sim_vio_port_t vio_port_2;
-extern sim_vio_port_t vio_port_3;
-extern sim_vio_port_t vio_port_4;
 extern const PALConfig pal_default_config;
 #endif
 

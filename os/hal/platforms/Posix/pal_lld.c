@@ -41,16 +41,6 @@ sim_vio_port_t vio_port_1;
  */
 sim_vio_port_t vio_port_2;
 
-/**
- * @brief   VIO3 simulated port.
- */
-sim_vio_port_t vio_port_3;
-
-/**
- * @brief   VIO4 simulated port.
- */
-sim_vio_port_t vio_port_4;
-
 /*===========================================================================*/
 /* Driver local variables and types.                                         */
 /*===========================================================================*/
@@ -98,6 +88,14 @@ void _pal_lld_setgroupmode(ioportid_t port,
     port->dir |= mask;
     break;
   }
+
+  printf ("%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
+          "port -> dir:", port -> dir,
+          "port -> latch:", port -> latch,
+          "port -> pin:", port -> pin,
+          "mask:", mask,
+	  "mode:", mode
+         );
 }
 
 #endif /* HAL_USE_PAL */
