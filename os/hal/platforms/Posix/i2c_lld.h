@@ -94,7 +94,8 @@ typedef struct {
 } I2CConfig;
 
 typedef struct {
-    char *buffer;
+    uint8_t *rxbuffer;
+    const uint8_t *txbuffer;
     bool isMalloc;
     bool isAllocate;
 }buffer_stream;
@@ -135,7 +136,7 @@ struct I2CDriver {
   /* End of the mandatory fields.*/
   i2caddr_t addr;
  
-   
+  Thread *thread ;
   //I2C_TypeDef *i2c;
 };
 

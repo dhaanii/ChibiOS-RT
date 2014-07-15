@@ -25,6 +25,7 @@
 #include "ch.h"
 #include "hal.h"
 #include <stdlib.h>
+#include <string.h>
 #if HAL_USE_I2C || defined(__DOXYGEN__)
 
 /*===========================================================================*/
@@ -54,9 +55,9 @@ I2CDriver I2CD1;
 static bool allocate_stream(buffer_stream  *bs)
 {
 
-    bs->buffer = malloc(256);
     
-    if(bs->buffer == NULL || bs->isMalloc == true)
+     bs = malloc(sizeof(*bs_1));
+    if(bs == NULL || bs->isMalloc == true)
     {
         return true;
     }
@@ -72,19 +73,44 @@ static bool allocate_stream(buffer_stream  *bs)
 //frees the buffer
 static void release_stream(buffer_stream *bs)
 {
-    free(bs->buffer); 
+    free((void*)bs->rxbuffer); 
+    free((void*)bs->txbuffer); 
     bs->isMalloc = false;
     free(bs);
 
 }
+static void recieve_stream(uint8_t * rxbuf, size_t rxbyte)
+{
+   bs_1->rxbuffer = (uint8_t *)malloc(rxbyte+1);
+   //char rxbuffer[rxbyte +1];
+   fgets((char*)bs_1->rxbuffer, rxbyte,stdin);
+   strcpy((char*)rxbuf, (char*)bs_1->rxbuffer);
+   //strcpy(bs_1->rxbuffer, rxbuf);
+
+}
+
+static void transmit_stream (const uint8_t *txbuf, size_t txbyte)
+{
+    bs_1->txbuffer = (const uint8_t *)malloc(txbyte+1);
+    strcpy((char *)bs_1->txbuffer,(char *) txbuf);
+}
+static void i2c_lld_safety_timeout(void *p)
+{
+    I2CDriver *i2cp = (I2CDriver *)p;
+    chSysLock();
+    if(i2cp->thread){
+        Thread *tp = i2cp->thread;
+        i2cp->thread = NULL;
+        tp->p_u.rdymsg = RDY_TIMEOUT;
+        chSchReadyI(tp);
+    }
+        chSysUnlock();
+}
 /*===========================================================================*/
 /* Driver interrupt handlers.                                                */
 /*===========================================================================*/
-
-/*===========================================================================*/
 /* Driver exported functions.                                                */
 /*===========================================================================*/
-
 /**
  * @brief   Low level I2C driver initialization.
  *
@@ -95,10 +121,6 @@ void i2c_lld_init(void) {
 #if PLATFORM_I2C_USE_I2C1
   i2cObjectInit(&I2CD1);
 #endif /* PLATFORM_I2C_USE_I2C1 */
- bs_1 = malloc(sizeof(*bs_1));
- bs_1->isMalloc = false;
- bs_1->buffer = NULL;
- bs_1->isAllocate = true;
 }
 
 /**
@@ -114,10 +136,6 @@ void i2c_lld_start(I2CDriver *i2cp) {
     /* Enables the peripheral.*/
 #if PLATFORM_I2C_USE_I2C1
      if (&I2CD1 == i2cp) {
-        if(bs_1->isAllocate == false)
-        {
-            bs_1 = malloc(sizeof(*bs_1));
-        }
         bool b;
         b = allocate_stream(bs_1);
         chDbgAssert(!b, "i2c_lld_start(), #1", "stream already allocated");
@@ -177,18 +195,34 @@ msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
                                      uint8_t *rxbuf, size_t rxbytes,
                                      systime_t timeout) {
 
-  (void)i2cp;
-  (void)addr;
-  (void)rxbuf;
-  (void)rxbytes;
-  (void)timeout;
    VirtualTimer vt;
+   chDbgCheck((rxbytes > 1), "i2c_lld_master_recive_timeout");
+
+   
    if(timeout != TIME_INFINITE)
    {
-        return RDY_TIMEOUT;
+       chVTSetI(&vt, timeout, i2c_lld_safety_timeout, (void *)i2cp);
    }
+   chSysUnlock();
 
-  return RDY_OK;
+   i2cp->addr = addr << 1;
+   i2cp->errors = 0;
+
+   recieve_stream(rxbuf, rxbytes);
+
+
+
+   if((timeout != TIME_INFINITE)  && !chVTIsArmedI(&vt))
+   {
+       return RDY_TIMEOUT;
+
+   }
+   i2cp->thread = chThdSelf();
+   chSchGoSleepS(THD_STATE_SUSPENDED);
+   if ((timeout != TIME_INFINITE) && chVTIsArmedI(&vt))
+       chVTResetI(&vt);
+
+  return chThdSelf()->p_u.rdymsg;
 }
 
 /**
@@ -229,11 +263,32 @@ msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
   (void)rxbytes;
   (void)timeout;
    VirtualTimer vt;
+
+   
    if(timeout != TIME_INFINITE)
    {
-        return RDY_TIMEOUT;
+       chVTSetI(&vt, timeout, i2c_lld_safety_timeout, (void *)i2cp);
    }
-  return RDY_OK;
+   chSysUnlock();
+
+   i2cp->addr = addr << 1;
+   i2cp->errors = 0;
+
+   recieve_stream(rxbuf, rxbytes);
+
+   transmit_stream(txbuf, txbytes);
+
+   if((timeout != TIME_INFINITE)  && !chVTIsArmedI(&vt))
+   {
+       return RDY_TIMEOUT;
+
+   }
+   i2cp->thread = chThdSelf();
+   chSchGoSleepS(THD_STATE_SUSPENDED);
+   if ((timeout != TIME_INFINITE) && chVTIsArmedI(&vt))
+       chVTResetI(&vt);
+
+  return chThdSelf()->p_u.rdymsg;
 }
 
 #endif /* HAL_USE_I2C */
