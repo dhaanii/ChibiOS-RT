@@ -17,45 +17,12 @@
 #include <stdio.h>
 #include "ch.h"
 #include "hal.h"
-#include <pthread.h>
-
-static WORKING_AREA(myThreadWorkingArea, 128);
-
-/*===========================================================================*/
-/* Driver exported variables.                                                */
-/*===========================================================================*/
-
-/**
- * @brief   EXTD1 driver identifier.
- */
-EXTDriver EXTD1;
-
-static void* ioportOn(void *vptr) {
-
-  (void)vptr;
-
-  while (TRUE) {
-    palSetPad(IOPORT1, 0);
-    printf("IOPORT1 ON\n");
-    chThdSleepMilliseconds(1000);
-  }
-
-  return NULL;
-}
-
-static void threadStart(void) {
-  (void)chThdCreateStatic(myThreadWorkingArea,
-                          sizeof(myThreadWorkingArea),
-                          NORMALPRIO,    /* Initial priority.    */
-                          ioportOn,      /* Thread function.     */
-                          NULL);         /* Thread parameter.    */
-}
 
 static void led4off(void *arg) {
 
   (void)arg;
 
-  palClearPad(IOPORT1, 0);
+  // palClearPad(GPIOC, GPIOC_LED4);
   printf("led4 OFF\n");
 
 }
@@ -67,7 +34,7 @@ static void extcb1(EXTDriver *extp, expchannel_t channel) {
   (void)extp;
   (void)channel;
 
-  palSetPad(IOPORT1, 0);
+  // palSetPad(GPIOC, GPIOC_LED4);
   printf("led4 ON\n");
 
   chSysLockFromIsr();
@@ -125,7 +92,6 @@ int main(void) {
    * Activates the EXT driver 1.
    */
   extStart(&EXTD1, &extcfg);
-  threadStart();
 
   /*
    * Normal main() thread activity, in this demo it enables and disables the

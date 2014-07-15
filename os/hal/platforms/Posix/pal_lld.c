@@ -88,6 +88,14 @@ void _pal_lld_setgroupmode(ioportid_t port,
     port->dir |= mask;
     break;
   }
+
+  printf ("%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n",
+          "port -> dir:", port -> dir,
+          "port -> latch:", port -> latch,
+          "port -> pin:", port -> pin,
+          "mask:", mask,
+	  "mode:", mode
+         );
 }
 
 #endif /* HAL_USE_PAL */

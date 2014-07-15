@@ -22,6 +22,9 @@
  * @{
  */
 
+/* Temporarily include stdio.h */
+#include <stdio.h>
+
 #ifndef _PAL_LLD_H_
 #define _PAL_LLD_H_
 
