@@ -17,7 +17,7 @@
 #
 
 TRGT = 
-CC   = $(TRGT)gcc
+CC   = $(TRGT)gcc 
 AS   = $(TRGT)gcc -x assembler-with-cpp
 
 # List all default C defines here, like -D_DEBUG=1
@@ -120,8 +120,8 @@ ifeq ($(HOST_OSX),yes)
   LIBS += $(OSX_ARCH)
 else
   # Linux, or other
-  CPFLAGS += -m32 -Wa,-alms=$(<:.c=.lst)
-  LDFLAGS = -m32 -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch $(LIBDIR)
+  CPFLAGS += -lrt -m32 -Wa,-alms=$(<:.c=.lst)
+  LDFLAGS = -lrt -m32 -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch $(LIBDIR)
 endif
 
 # Generate dependency information
